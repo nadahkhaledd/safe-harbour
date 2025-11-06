@@ -82,7 +82,7 @@ plt.figure(figsize=(12,6))
 ax = plt.subplot(111, projection='mollweide')
 ax.scatter(lon_rad, lat_rad, c=colors, s=2)
 ax.grid(True, linestyle='--', alpha=0.3)
-ax.set_title("Landing Site Ranking on Mars (Mollweide projection)")
+ax.set_title("Landing Site Ranking on Mars")
 ax.legend(handles=[patch1, patch2], loc='lower left', fontsize=10)
 plt.show()
 
@@ -101,14 +101,17 @@ print("Dane zapisane do mars_landing_sites_topo.csv")
 
 # --- Plot with Seaborn ---
 plt.figure(figsize=(12,6))
-sns.scatterplot(data=df, x='lon', y='lat', hue='rank', palette={Best:'green',Suboptimal:'orange'}, s=5, legend='full')
+sns.scatterplot(data=df, x='lon', y='lat', hue='rank', palette={1:'green',2:'orange'}, s=5, legend='full')
 plt.title("Landing Site Ranking on Mars")
 plt.xlabel("Longitude [°]")
 plt.ylabel("Latitude [°]")
 plt.xlim(-180, 180)
 plt.ylim(-90, 90)
 plt.grid(True, linestyle='--', alpha=0.3)
-plt.legend(title='Range')
+
+best_patch = patches.Patch(color='green', label='Best')
+sub_patch = patches.Patch(color='orange', label='Suboptimal')
+plt.legend(handles=[best_patch, sub_patch], title='Suitability')
 plt.show()
 
 
