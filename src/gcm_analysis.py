@@ -42,7 +42,7 @@ def get_analysis(df):
     return lat_res, lon_res, pixel_size_km
 
 def main():
-    df = load_data("../data/gcm/out_grid1x1deg_0h_0sollon.csv")
+    df = load_data("../data/gcm/datasets/out_grid1x1deg_0h_0sollon.csv")
     df = df.apply(pd.to_numeric, errors='coerce')
 
     lat_res, lon_res, pixel_size_km = get_analysis(df)
