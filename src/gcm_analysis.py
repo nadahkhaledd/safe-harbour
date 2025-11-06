@@ -3,6 +3,7 @@ import geopandas as gpd
 from shapely.geometry import Point
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 #FOR MCD DATA
 def main():
@@ -12,15 +13,19 @@ def main():
     DEGREE_LENGTH_MARS = MARS_CIRCUMFERENCE / 360  # długość 1 stopnia w metrach (~59.3 km)
 
 
-    header_file_path = "../data/gcm/gcm_headers.txt"
-
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Construct path to headers file
+    header_file_path = os.path.join(script_dir, "..", "data", "gcm", "gcm_headers.txt")
+    data_file_path = os.path.join(script_dir, "..", "data", "gcm", "out_grid1x1deg_0h_0sollon.csv")
+    
     with open(header_file_path, 'r') as f:
         header_line = f.readline().strip()
         new_column_names = header_line.split(',')
 
 
 
-    df = pd.read_csv("../data/gcm/out_grid1x1deg_0h_0sollon.csv", sep=';', names=new_column_names, skiprows=[0])
+    df = pd.read_csv(data_file_path, sep=';', names=new_column_names, skiprows=[0])
 
     df = df.apply(pd.to_numeric, errors='coerce')
 
