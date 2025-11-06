@@ -41,13 +41,10 @@ long_deg, lat_deg = transformer.transform(xs, ys)
 # --- Convert longitude range (0–360 → -180–180) ---
 long_deg = ((long_deg + 180) % 360) - 180
 
-# ---Compute slope in degrees ---
-slope_deg = np.degrees(np.arctan(slope))
-
 # ---Define suitability conditions (NASA/ESA-like) ---
-slope_ok = slope_deg < 10       # low slope
+slope_ok = slope <= 20       # low slope
 roughness_ok = roughness < 2    # smooth surface
-elevation_ok = elevation < 0    # below mean elevation
+elevation_ok = elevation <= 1000    # below mean elevation
 
 # ---Plot maps (basic raster view, not Mollweide) ---
 fig, axes = plt.subplots(1, 3, figsize=(18, 6))
