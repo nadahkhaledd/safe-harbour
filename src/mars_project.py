@@ -144,6 +144,7 @@ plt.show()
 # plt.imshow(elevation_plot, cmap='Greens',
 #            extent=[long_deg.min(), long_deg.max(), lat_deg.min(), lat_deg.max()],
 #            origin='upper')
+
 # plt.colorbar(label='Elevation suitability')
 # plt.title('Elevation < 1000 m')
 # plt.xlabel('Longitude (°E)')
