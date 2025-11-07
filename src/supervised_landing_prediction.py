@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import LeaveOneOut, cross_val_score
+import matplotlib.pyplot as plt
 
 import gcm.gcm_preprocessing as gcm
 
@@ -133,6 +134,26 @@ def train_model(training_df):
     model = RandomForestClassifier(random_state=42, n_estimators=100)
     model.fit(X_train, y_train)
 
+    # Get feature importances
+    importances = model.feature_importances_
+    feature_names = X_train.columns
+
+    # Create a DataFrame for easy plotting
+    feat_imp_df = pd.DataFrame({'feature': feature_names, 'importance': importances})
+    feat_imp_df = feat_imp_df.sort_values(by='importance', ascending=True)
+
+    # Plot the results as a horizontal bar chart
+    plt.figure(figsize=(10, 8))
+    plt.barh(feat_imp_df['feature'], feat_imp_df['importance'])
+    plt.xlabel("Importance")
+    plt.ylabel("Feature")
+    plt.title("Which Features Did the Model Use Most?")
+    plt.tight_layout()
+    plt.savefig("../output/feature_importance.png")
+    print("Saved 'feature_importance.png'")
+
+    return model, existing_features
+
     # --- Model Evaluation ---
     print("Evaluating model with Leave-One-Out Cross-Validation...")
     loo = LeaveOneOut()
@@ -250,6 +271,9 @@ def main():
 
     # 2. Create the small, merged training dataset
     training_df = create_training_data(df_missions, df_mola, df_gcm)
+
+    # save training data for inspection as csv
+    training_df.to_csv("../output/training_dataset.csv", index=False)
 
     # 3. Train the model on the training dataset
     model, features_list = train_model(training_df)
