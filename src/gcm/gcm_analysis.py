@@ -10,7 +10,7 @@ DEGREE_LENGTH_MARS = MARS_CIRCUMFERENCE / 360  # m/degree
 
 
 def load_data(file_path):
-    header_file_path = "../data/gcm/gcm_headers.txt"
+    header_file_path = "../../data/gcm/gcm_headers.txt"
 
     with open(header_file_path, 'r') as f:
         header_line = f.readline().strip()
@@ -42,7 +42,7 @@ def get_analysis(df):
     return lat_res, lon_res, pixel_size_km
 
 def main():
-    df = load_data("../data/gcm/datasets/out_grid1x1deg_0h_0sollon.csv")
+    df = load_data("../../data/gcm/datasets/out_grid1x1deg_0h_0sollon.csv")
     df = df.apply(pd.to_numeric, errors='coerce')
 
     lat_res, lon_res, pixel_size_km = get_analysis(df)
