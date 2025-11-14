@@ -135,9 +135,9 @@ def main():
     # --- Define file paths ---
     headers_file = "../data/gcm/gcm_headers.txt"
 
-    gcm_folder = "../data/gcm/datasets"
+    gcm_folder = "../data/gcm/every_month"
 
-    output_file = "../data/output/gcm/gcm_suitability_map_binary.csv"
+    output_file = "../output/gcm/gcm_suitability_map_binary.csv"
 
     # --- Run Analysis ---
 
