@@ -56,7 +56,7 @@ lon = ((lon + 180) % 360) - 180  # convert 0–360 → -180–180
 
 # --- Create ranking ---
 rank = np.ones(lon.shape, dtype=int)  # domyślnie range 1
-range2 = (lat < -50) | (lat > 50)
+range2 = (lat < -55) | (lat > 55)
 rank[range2] = 2
 
 # --- Flatten data for seaborn (już spłaszczone) ---
