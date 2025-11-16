@@ -1,0 +1,17 @@
+mission,country,year,latitude,longitude,notes,success_landing
+Mars 3,USSR,1971,-45.0,202.3,Partial success - lost contact after 110 seconds,1
+Viking 1,USA,1976,22.27,312.05,Chryse Planitia,1
+Viking 2,USA,1976,47.97,225.71,Utopia Planitia,1
+Mars Pathfinder,USA,1997,19.13,326.78,Ares Vallis,1
+MER-A Spirit,USA,2004,-14.5692,175.4729,Gusev Crater,1
+MER-B Opportunity,USA,2004,-1.9462,354.4734,Meridiani Planum,1
+Phoenix,USA,2008,68.22,234.25,Vastitas Borealis,1
+Curiosity (MSL),USA,2012,-4.5895,137.4417,Gale Crater,1
+InSight,USA,2018,4.5,135.9,Elysium Planitia,1
+Perseverance,USA,2021,18.4447,77.4508,Jezero Crater,1
+Tianwen-1 / Zhurong,China,2021,25.066,109.925,Utopia Planitia,1
+Mars 2 Lander,USSR,1971,-45.0,47.0,Crashed - descent system malfunctioned,0
+Mars 6 Lander,USSR,1973,-23.90,340.58,Crashed - contact lost on landing,0
+Mars Polar Lander,USA,1999,-76.0,165.0,Crashed - lost contact during descent (target zone),0
+Beagle 2,UK/ESA,2003,11.53,90.43,Landed but failed to deploy - no contact,0
+Schiaparelli EDM,ESA,2016,-2.05,353.79,Crashed - computer error,0
