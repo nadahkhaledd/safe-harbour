@@ -52,52 +52,22 @@ mars_geog = CRS.from_proj4("+proj=longlat +a=3396000 +b=3396000 +no_defs")
 transformer = Transformer.from_crs(mars_eqc, mars_geog, always_xy=True)
 
 lon, lat = transformer.transform(xs_ok, ys_ok)
-lon = ((lon + 180) % 360) - 180  # convert 0–360 → -180–180
+
+# --- Shift longitudes to match central meridian 180 and wrap to -180..180 ---
+lon = lon - 180
+lon = ((lon + 180) % 360) - 180
 
 # --- Create ranking ---
 rank = np.ones(lon.shape, dtype=int)  # domyślnie range 1
 range2 = (lat < -55) | (lat > 55)
 rank[range2] = 2
 
-# --- Flatten data for seaborn (już spłaszczone) ---
+# --- Flatten data for seaborn ---
 df = pd.DataFrame({
     'lon': lon,
     'lat': lat,
     'rank': rank
 })
-
-# --- Konwersja do radianów ---
-lon_rad = np.radians(df['lon'].values)
-lat_rad = np.radians(df['lat'].values)
-rank = df['rank'].values
-
-# --- Kolory dla rankingów ---
-colors = np.array(['green' if r==1 else 'orange' for r in rank])
-
-# --- Plot w Mollweide ---
-patch1 = patches.Patch(color='green', label='Best')
-patch2 = patches.Patch(color='orange', label='Suboptimal')
-
-plt.figure(figsize=(12,6))
-ax = plt.subplot(111, projection='mollweide')
-ax.scatter(lon_rad, lat_rad, c=colors, s=2)
-ax.grid(True, linestyle='--', alpha=0.3)
-ax.set_title("Landing Site Ranking on Mars")
-ax.legend(handles=[patch1, patch2], loc='lower left', fontsize=10)
-plt.show()
-
-# --- Przygotowanie danych do CSV ---
-df_csv = pd.DataFrame({
-    'x': cols_ok,         # kolumny rasteru
-    'y': rows_ok,         # wiersze rasteru
-    'lon': lon,           # geograficzne longitude
-    'lat': lat,           # geograficzne latitude
-    'rank': rank          # 1 lub 2
-})
-
-# --- Zapis do CSV ---
-df_csv.to_csv("mars_landing_sites_topo.csv", index=False)
-print("Dane zapisane do mars_landing_sites_topo.csv")
 
 # --- Plot with Seaborn ---
 plt.figure(figsize=(12,6))
@@ -114,6 +84,49 @@ sub_patch = patches.Patch(color='orange', label='Suboptimal')
 plt.legend(handles=[best_patch, sub_patch], title='Suitability')
 plt.show()
 
+# # --- Kolory dla rankingów ---
+# colors = np.array(['green' if r==1 else 'orange' for r in rank])
+#
+# # --- Plot w Mollweide ---
+# patch1 = patches.Patch(color='green', label='Best')
+# patch2 = patches.Patch(color='orange', label='Suboptimal')
+#
+# plt.figure(figsize=(12,6))
+# ax = plt.subplot(111, projection='mollweide')
+# ax.scatter(lon_rad, lat_rad, c=colors, s=2)
+# ax.grid(True, linestyle='--', alpha=0.3)
+# ax.set_title("Landing Site Ranking on Mars")
+# ax.legend(handles=[patch1, patch2], loc='lower left', fontsize=10)
+# plt.show()
+#
+# # --- Przygotowanie danych do CSV ---
+# df_csv = pd.DataFrame({
+#     'x': cols_ok,         # kolumny rasteru
+#     'y': rows_ok,         # wiersze rasteru
+#     'lon': lon,           # geograficzne longitude
+#     'lat': lat,           # geograficzne latitude
+#     'rank': rank          # 1 lub 2
+# })
+#
+# # --- Zapis do CSV ---
+# df_csv.to_csv("mars_landing_sites_topo.csv", index=False)
+# print("Dane zapisane do mars_landing_sites_topo.csv")
+
+# # --- Plot with Seaborn ---
+# plt.figure(figsize=(12,6))
+# sns.scatterplot(data=df, x='lon', y='lat', hue='rank', palette={1:'green',2:'orange'}, s=5, legend='full')
+# plt.title("Landing Site Ranking on Mars")
+# plt.xlabel("Longitude [°]")
+# plt.ylabel("Latitude [°]")
+# plt.xlim(-180, 180)
+# plt.ylim(-90, 90)
+# plt.grid(True, linestyle='--', alpha=0.3)
+#
+# best_patch = patches.Patch(color='green', label='Best')
+# sub_patch = patches.Patch(color='orange', label='Suboptimal')
+# plt.legend(handles=[best_patch, sub_patch], title='Suitability')
+# plt.show()
+#
 
 # # Mask NoData values for plotting
 # slope_plot = np.where(np.isnan(slope_deg), np.nan, slope_ok)
