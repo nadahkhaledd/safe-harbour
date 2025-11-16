@@ -151,14 +151,14 @@ def plot_3d_globe_map(csv_file_path, output_html_path):
 
 def main():
     # Example usage
-    input_map_file = "../output/final_suitability_map.csv"
+    input_map_file = "../output/final_suitability_map_full2.csv"
 
     # Check if the input file exists before running
     if os.path.exists(input_map_file):
-        output_image = "../output/final_map_2D.png"
+        output_image = "../output/final_map_2D_2.png"
         plot_2d_suitability_map(input_map_file, output_image)
 
-        output_3d_html = "../output/final_map_3D_globe.html"
+        output_3d_html = "../output/final_map_3D_globe2.html"
         plot_3d_globe_map(input_map_file, output_3d_html)
     else:
         print(f"Error: Input file not found at '{input_map_file}'")
