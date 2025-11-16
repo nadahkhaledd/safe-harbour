@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import LeaveOneOut, cross_val_score
+from sklearn.model_selection import LeaveOneOut, cross_val_score, train_test_split
 from sklearn.metrics import accuracy_score
 import gcm.gcm_preprocessing as gcm
 
@@ -116,15 +116,19 @@ def train_model(training_df):
     # Fill NA with -1 for model
     X.fillna(-1, inplace=True)
 
+    # 80/20 train/test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
     model = RandomForestClassifier(n_estimators=200, random_state=42, class_weight='balanced')
 
-    # Leave-One-Out CV
-    loo = LeaveOneOut()
-    scores = cross_val_score(model, X, y, cv=loo)
-    print(f"Leave-One-Out CV accuracy: {scores.mean():.3f}")
+    # Train on training set
+    model.fit(X_train, y_train)
 
-    # Train on full dataset
-    model.fit(X, y)
+    # Evaluate on test set
+    test_acc = model.score(X_test, y_test)
+    print(f"Test set accuracy (80/20 split): {test_acc:.3f}")
 
     # Plot feature importance
     plot_feature_importance(model, FEATURES)
@@ -133,7 +137,38 @@ def train_model(training_df):
     generate_correlation_matrix(training_df, FEATURES)
 
     return model, FEATURES
-
+####################second training option#########################
+# def train_model(training_df):
+#     TARGET = 'success_landing'
+#     FEATURES = ['extvar_29_min','extvar_29_max','extvar_29_mean',
+#                 'extvar_44_min','extvar_44_max','extvar_44_mean',
+#                 'temperature_min','temperature_max','temperature_mean',
+#                 'windspeed_min','windspeed_max','windspeed_mean','rank']
+#     FEATURES = [f for f in FEATURES if f in training_df.columns]
+#
+#     X = training_df[FEATURES]
+#     y = training_df[TARGET]
+#
+#     # Fill NA with -1 for model
+#     X.fillna(-1, inplace=True)
+#
+#     model = RandomForestClassifier(n_estimators=200, random_state=42, class_weight='balanced')
+#
+#     # Leave-One-Out CV
+#     loo = LeaveOneOut()
+#     scores = cross_val_score(model, X, y, cv=loo)
+#     print(f"Leave-One-Out CV accuracy: {scores.mean():.3f}")
+#
+#     # Train on full dataset
+#     model.fit(X, y)
+#
+#     # Plot feature importance
+#     plot_feature_importance(model, FEATURES)
+#
+#     # Correlation matrix
+#     generate_correlation_matrix(training_df, FEATURES)
+#
+#     return model, FEATURES
 # ============================================================
 # 5. GLOBAL PREDICTION
 # ============================================================
