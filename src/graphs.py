@@ -2,10 +2,6 @@ import graphviz
 import os
 
 def create_pipeline_graph(output_filename='../output/project_pipeline'):
-    """
-    Generates a high-quality flowchart of the entire
-    supervised learning workflow.
-    """
     # Ensure the output directory exists
     os.makedirs(os.path.dirname(output_filename), exist_ok=True)
 

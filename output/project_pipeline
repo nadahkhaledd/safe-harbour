@@ -1,0 +1,52 @@
+// Project: Safe Harbour Pipeline
+digraph {
+	fontsize=20 label="Project: Safe Harbour - Full ML Pipeline" rankdir=TB
+	splines=ortho
+	subgraph cluster_0_raw_data {
+		color=lightyellow label="Raw Data Sources" style=filled
+		mola_raw [label="MOLA Global Map (Raw)" color=skyblue shape=ellipse style=filled]
+		gcm_raw [label="GCM (24 \"Monthly\" Files)" color=skyblue shape=ellipse style=filled]
+		missions_raw [label="Past Missions (16 missions)" color=skyblue shape=ellipse style=filled]
+		rank=same
+	}
+	mola_raw -> mola_process
+	gcm_raw -> gcm_process
+	mola_process -> mola_file
+	gcm_process -> gcm_file
+	subgraph cluster_1_preprocessing {
+		color=whitesmoke label="Part 1: Data Preprocessing" style=filled
+		mola_process [label="1a. Terrain Analysis
+(Slope, Elevation, etc.)" color=palegreen shape=box style=filled]
+		gcm_process [label="1b. GCM Aggregation
+(Calculate Yearly min/max/mean)" color=palegreen shape=box style=filled]
+		mola_file [label="MOLA Suitability Map
+(mola_map.csv)" color=lightgrey shape=note style=filled]
+		gcm_file [label="GCM Yearly Stats Map
+(gcm_yearly_stats.csv)" color=lightgrey shape=note style=filled]
+	}
+	missions_raw -> merge_train
+	mola_file -> merge_train
+	gcm_file -> merge_train
+	merge_train -> train_model
+	subgraph cluster_2_training {
+		color=whitesmoke label="Part 2: Model Training (on Past Missions)" style=filled
+		merge_train [label="2a. Merge Training Data
+(Missions + MOLA + GCM)" color=palegreen shape=box style=filled]
+		train_model [label="2b. Train Suitability Model
+(RandomForestClassifier)" color=orange shape=cylinder style=filled]
+	}
+	mola_file -> merge_predict
+	gcm_file -> merge_predict
+	merge_predict -> predict
+	train_model -> predict
+	predict -> final_map
+	subgraph cluster_3_prediction {
+		color=whitesmoke label="Part 3: Global Prediction (on All Mars)" style=filled
+		merge_predict [label="3a. Prepare Global Data
+(MOLA + GCM)" color=palegreen shape=box style=filled]
+		predict [label="3b. Predict Suitability
+(model.predict_proba)" color=palegreen shape=box style=filled]
+		final_map [label="Final Suitability Map
+(suitability_score: 0.0 to 1.0)" color=gold shape=diamond style=filled]
+	}
+}
