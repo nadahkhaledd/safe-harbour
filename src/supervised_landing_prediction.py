@@ -112,8 +112,11 @@ def train_model(training_df):
 
     # --- Define our Features (X) and Target (y) ---
     GCM_FEATURES = [
-        'extvar_29_min', 'extvar_29_max', 'extvar_29_mean',
-        'extvar_44_min', 'extvar_44_max', 'extvar_44_mean',
+        'extvar_19_min', 'extvar_19_max', 'extvar_19_mean',
+        'extvar_40_min', 'extvar_40_max', 'extvar_40_mean',
+        'extvar_28_min', 'extvar_28_max', 'extvar_28_mean',
+        'extvar_25_min', 'extvar_25_max', 'extvar_25_mean',
+        'atm_pressure_min', 'atm_pressure_max', 'atm_pressure_mean',
         'temperature_min', 'temperature_max', 'temperature_mean',
         'windspeed_min', 'windspeed_max', 'windspeed_mean'
     ]
