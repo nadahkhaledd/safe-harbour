@@ -136,16 +136,16 @@ def prepare_single_gcm_file_for_prediction(headers_file_path, single_file_path, 
 
 def main():
     # Adjust paths as needed
-    headers_file = "../../data/gcm/gcm_headers.txt"
-    gcm_folder = "../../data/gcm/every_month"
-    gcm_stats_output = "../../data/gcm/datasets/gcm_yearly_stats.csv"
+    headers_file = "data/gcm/gcm_headers.txt" 
+    gcm_folder = "data/gcm/every_month"
+    gcm_stats_output = "data/gcm/datasets/gcm_yearly_stats.csv"
 
     # 1. Create Training Data Source
     create_gcm_yearly_stats(headers_file, gcm_folder, gcm_stats_output)
 
     # 2. Create Prediction Data Source (using one example month)
-    pred_input = "../../data/gcm/every_month/out_grid1x1deg_0h_0sollon.csv"
-    pred_output = "../../data/gcm/datasets/gcm_prediction_input_prepared.csv"
+    pred_input = "data/gcm/every_month/out_grid1x1deg_0h_0sollon.csv"
+    pred_output = "data/gcm/datasets/gcm_prediction_input_prepared.csv"
     prepare_single_gcm_file_for_prediction(headers_file, pred_input, pred_output)
 
 
