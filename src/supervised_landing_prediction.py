@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import LeaveOneOut, cross_val_score
+from sklearn.model_selection import LeaveOneOut, cross_val_score, cross_val_predict
 import matplotlib.pyplot as plt
-
+import seaborn as sns
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score, f1_score
 import gcm.gcm_preprocessing as gcm
 
 
@@ -167,6 +168,65 @@ def train_model(training_df):
     return model, existing_features
 
 
+def validate_model():
+    # 1. Load your existing training data
+    # We assume this file was already created by your previous runs
+    file_path = "../output/training_dataset.csv"
+    try:
+        df = pd.read_csv(file_path)
+        print(f"Loaded training data: {len(df)} rows")
+    except FileNotFoundError:
+        print("Error: training_dataset.csv not found. Please checking your output folder.")
+        return
+
+    # 2. Define Features (Simple list based on your previous code)
+    features = [
+        'extvar_19_mean', 'extvar_40_mean', 'extvar_28_mean', 'extvar_25_mean',
+        'atm_pressure_mean', 'temperature_mean', 'windspeed_max'
+    ]
+    target = 'success_landing'
+
+    # Check if columns exist
+    available_features = [f for f in features if f in df.columns]
+    print(f"Training on features: {available_features}")
+
+    X = df[available_features].fillna(0)
+    y = df[target]
+
+    # 3. Define Model (Random Forest)
+    model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced', max_depth=3)
+
+    # 4. Run Validation (Leave-One-Out)
+    print("\nRunning Validation...")
+    loo = LeaveOneOut()
+    y_pred = cross_val_predict(model, X, y, cv=loo)
+
+    # 5. Print Metrics for Report
+    print("\n" + "=" * 30)
+    print("   FINAL MODEL RESULTS")
+    print("=" * 30)
+
+    acc = accuracy_score(y, y_pred)
+    f1 = f1_score(y, y_pred, average='weighted')
+
+    print(f"Accuracy: {acc:.2%}")
+    print(f"F1 Score: {f1:.2f}")
+    print("\nConfusion Matrix:")
+    cm = confusion_matrix(y, y_pred)
+    print(cm)
+
+    print("\nClassification Report:")
+    print(classification_report(y, y_pred))
+
+    # 6. Generate Confusion Matrix Plot
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title('Confusion Matrix')
+    plt.ylabel('True Label')
+    plt.xlabel('Predicted Label')
+    plt.savefig('../output/confusion_matrix.png')
+    print("\nSaved confusion_matrix.png")
+
 # --- 4. Prepare Prediction Set (The whole planet) ---
 def prepare_global_prediction_set(df_mola, df_gcm_prediction_file):
     print("\n--- Step 4: Preparing Global Prediction Set (All Mars) ---")
@@ -284,6 +344,8 @@ def main():
     if model is None:
         print("Aborting run due to model training error.")
         return
+
+    validate_model()
 
     # 4c. Prepare the global prediction set by merging MOLA and the single GCM file
     prediction_input_file = "../data/gcm/every_month/out_grid1x1deg_0h_0sollon.csv"
