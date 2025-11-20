@@ -46,7 +46,7 @@ def create_gcm_yearly_stats(headers_file_path, gcm_folder_path, output_file_path
         'extvar_19',
         'extvar_28',
         'extvar_25',
-        'atm pressure',
+        'atm pressure'
     ]
 
     core_data = full_data[['latitude', 'longitude'] + key_params]

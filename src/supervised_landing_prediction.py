@@ -113,13 +113,13 @@ def train_model(training_df):
 
     # --- Define our Features (X) and Target (y) ---
     GCM_FEATURES = [
-        'extvar_19_min', 'extvar_19_max', 'extvar_19_mean',
-        'extvar_40_min', 'extvar_40_max', 'extvar_40_mean',
-        'extvar_28_min', 'extvar_28_max', 'extvar_28_mean',
-        'extvar_25_min', 'extvar_25_max', 'extvar_25_mean',
-        'atm_pressure_min', 'atm_pressure_max', 'atm_pressure_mean',
-        'temperature_min', 'temperature_max', 'temperature_mean',
-        'windspeed_min', 'windspeed_max', 'windspeed_mean'
+        'extvar_19_mean',  # Surface Pressure (Correct)
+        'extvar_40_mean',  # Dust (Correct)
+        'extvar_28_mean',  # Turbulence
+        'extvar_25_mean',  # Wind Variability (New)
+        'atm_pressure_mean',
+        'temperature_mean',
+        'windspeed_max'
     ]
     MOLA_FEATURES = ['rank']
     FEATURES = GCM_FEATURES + MOLA_FEATURES
@@ -168,9 +168,11 @@ def train_model(training_df):
     return model, existing_features
 
 
+# python
+from sklearn.metrics import roc_curve, auc, roc_auc_score
+
 def validate_model():
     # 1. Load your existing training data
-    # We assume this file was already created by your previous runs
     file_path = "../output/training_dataset.csv"
     try:
         df = pd.read_csv(file_path)
@@ -179,27 +181,35 @@ def validate_model():
         print("Error: training_dataset.csv not found. Please checking your output folder.")
         return
 
-    # 2. Define Features (Simple list based on your previous code)
+    # 2. Define Features
     features = [
         'extvar_19_mean', 'extvar_40_mean', 'extvar_28_mean', 'extvar_25_mean',
         'atm_pressure_mean', 'temperature_mean', 'windspeed_max'
     ]
     target = 'success_landing'
 
-    # Check if columns exist
     available_features = [f for f in features if f in df.columns]
     print(f"Training on features: {available_features}")
 
     X = df[available_features].fillna(0)
     y = df[target]
 
-    # 3. Define Model (Random Forest)
+    # 3. Define Model
     model = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced', max_depth=3)
 
     # 4. Run Validation (Leave-One-Out)
     print("\nRunning Validation...")
     loo = LeaveOneOut()
+
+    # predicted class labels
     y_pred = cross_val_predict(model, X, y, cv=loo)
+
+    # predicted probabilities for the positive class (required for ROC/AUC)
+    try:
+        y_proba = cross_val_predict(model, X, y, cv=loo, method='predict_proba')[:, 1]
+    except Exception as e:
+        print("!! ERROR: predict_proba failed during cross_val_predict:", e)
+        y_proba = None
 
     # 5. Print Metrics for Report
     print("\n" + "=" * 30)
@@ -225,7 +235,31 @@ def validate_model():
     plt.ylabel('True Label')
     plt.xlabel('Predicted Label')
     plt.savefig('../output/confusion_matrix.png')
-    print("\nSaved confusion_matrix.png")
+    print("\nSaved `../output/confusion_matrix.png`")
+
+    # 7. ROC Curve and AUC (if probabilities available)
+    if y_proba is not None:
+        try:
+            fpr, tpr, thresholds = roc_curve(y, y_proba)
+            roc_auc = auc(fpr, tpr)  # or roc_auc_score(y, y_proba)
+            print(f"\nAUC: {roc_auc:.3f}")
+
+            plt.figure(figsize=(6, 6))
+            plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (AUC = {roc_auc:.3f})')
+            plt.plot([0, 1], [0, 1], color='navy', lw=1, linestyle='--')
+            plt.xlim([0.0, 1.0])
+            plt.ylim([0.0, 1.05])
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('Receiver Operating Characteristic (ROC)')
+            plt.legend(loc='lower right')
+            plt.grid(True)
+            plt.savefig('../output/roc_curve.png')
+            print("Saved `../output/roc_curve.png`")
+        except Exception as e:
+            print("!! WARNING: Failed to compute or plot ROC/AUC:", e)
+    else:
+        print("!! WARNING: Probability estimates not available; skipping ROC/AUC.")
 
 # --- 4. Prepare Prediction Set (The whole planet) ---
 def prepare_global_prediction_set(df_mola, df_gcm_prediction_file):
@@ -243,16 +277,12 @@ def prepare_global_prediction_set(df_mola, df_gcm_prediction_file):
     # Just like in training, fill all non-optimal terrain with rank 3
     global_map_df['rank'] = global_map_df['rank'].fillna(3)
 
-    # Fill any other missing data just in case
     global_map_df = global_map_df.fillna(0)
 
-    # --- CRITICAL: Calculate windspeed for the prediction set ---
-    # This was missing from your previous file.
     if 'zonal wind' in global_map_df.columns and 'meridional wind' in global_map_df.columns:
         print("Calculating windspeed for prediction set...")
         global_map_df['windspeed_mean'] = np.sqrt(
             global_map_df['zonal wind'] ** 2 + global_map_df['meridional wind'] ** 2)
-        # We assume min/max are the same as mean for a single file
         global_map_df['windspeed_min'] = global_map_df['windspeed_mean']
         global_map_df['windspeed_max'] = global_map_df['windspeed_mean']
     else:
@@ -262,7 +292,6 @@ def prepare_global_prediction_set(df_mola, df_gcm_prediction_file):
     return global_map_df
 
 
-# --- 5. Predict and Save ---
 def predict_and_save_map(model, features_list, global_map_df, output_file):
     if model is None:
         print("!! ERROR: Model was not trained. Aborting prediction.")
@@ -270,21 +299,17 @@ def predict_and_save_map(model, features_list, global_map_df, output_file):
 
     print("\n--- Step 5: Predicting Suitability for all of Mars ---")
 
-    # --- CRITICAL: Rename columns to match model's features ---
-    # The model was trained on 'temperature_mean', but the single GCM
-    # file just has 'temperature'. We must rename them.
-    # This is a robust way to handle the difference in file types.
     rename_map = {
-        'extvar_29': 'extvar_29_mean',
-        'extvar_44': 'extvar_44_mean',
+        'extvar_19': ['extvar_19_mean', 'extvar_19_min' 'extvar_19_max'],
+        'extvar_40': ['extvar_40_mean', 'extvar_40_min' 'extvar_40_max'],
+        'extvar_28': ['extvar_28_mean', 'extvar_28_min' 'extvar_28_max'],
+        'extvar_25': ['extvar_25_mean', 'extvar_25_min' 'extvar_25_max'],
+        'atm pressure': 'atm_pressure_mean',
+         'windspeed': 'windspeed_max',
         'temperature': 'temperature_mean',
-        # (add min/max if your single file has them,
-        #  but for now we assume it only provides the 'mean' value)
     }
     global_map_df_renamed = global_map_df.rename(columns=rename_map)
 
-    # Fill in any missing 'min' or 'max' columns with the 'mean' value
-    # This is a form of "test-time imputation"
     for col in features_list:
         if col not in global_map_df_renamed.columns:
             if '_min' in col:
