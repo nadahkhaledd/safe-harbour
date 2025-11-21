@@ -1,6 +1,6 @@
 # 🚀 Project Safe Harbour: Mars Landing Site Assessment
 
-![Mars Banner](https://img.shields.io/badge/Mars-Safe%20Harbour-red) ![Python](https://img.shields.io/badge/Python-3.8%2B-blue) ![License](https://img.shields.io/badge/License-MIT-green)
+![Mars Banner](https://img.shields.io/badge/Mars-Safe%20Harbour-red) ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 
 **Safe Harbour** is a Data Literacy Winter School project (2025) that utilizes Supervised Machine Learning to identify the safest landing zones on Mars. By fusing high-resolution terrain data (MOLA) with global climate simulations (GCM), we automate the risk assessment process for future robotic missions.
 
